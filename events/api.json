@@ -1,0 +1,42 @@
+{
+    "get-hello": {
+        "body": null,
+        "resource": "/{proxy+}",
+        "path": "/",
+        "httpMethod": "GET",
+        "isBase64Encoded": false,
+        "queryStringParameters": {},
+        "pathParameters": {
+            "proxy": ""
+        },
+        "headers": {
+            "Accept": "*/*",
+            "Host": "localhost:3000"
+        },
+        "requestContext": {
+            "resourcePath": "/{proxy+}",
+            "httpMethod": "GET",
+            "path": "/"
+        }
+    },
+    "get-tasks": {
+        "body": null,
+        "resource": "/{proxy+}",
+        "path": "/tasks",
+        "httpMethod": "GET",
+        "isBase64Encoded": false,
+        "queryStringParameters": {},
+        "pathParameters": {
+            "proxy": "tasks"
+        },
+        "headers": {
+            "Accept": "*/*",
+            "Host": "localhost:3000"
+        },
+        "requestContext": {
+            "resourcePath": "/{proxy+}",
+            "httpMethod": "GET",
+            "path": "/tasks"
+        }
+    }
+}

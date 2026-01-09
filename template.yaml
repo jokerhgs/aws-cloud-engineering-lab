@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Hono API on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 512
+    Runtime: nodejs20.x
+    Environment:
+      Variables:
+        NODE_ENV: development
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda.handler
+      CodeUri: .
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Layers:
+        - !Ref OrmLayer
+        - !Ref NativeLayer
+
+  OrmLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: orm-layer
+      Description: Layer for Prisma and database dependencies
+      ContentUri: layers/orm
+      CompatibleRuntimes:
+        - nodejs20.x
+    Metadata:
+      BuildMethod: nodejs20.x
+
+  NativeLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: native-layer
+      Description: Layer for Hono and utility dependencies
+      ContentUri: layers/native
+      CompatibleRuntimes:
+        - nodejs20.x
+    Metadata:
+      BuildMethod: nodejs20.x
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

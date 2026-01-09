@@ -1,0 +1,12 @@
+{
+    "name": "lambda-layer-orm",
+    "version": "1.0.0",
+    "description": "AWS Lambda Layer for ORM dependencies (Prisma and PostgreSQL)",
+    "type": "module",
+    "dependencies": {
+        "@prisma/adapter-pg": "^7.1.0",
+        "@prisma/client": "^7.1.0",
+        "prisma": "^7.1.0",
+        "pg": "^8.16.3"
+    }
+}
