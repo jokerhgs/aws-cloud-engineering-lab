@@ -15,7 +15,7 @@ Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: lambda.handler
+      Handler: src/lambda.handler
       CodeUri: .
       Events:
         ApiEvent:
@@ -26,6 +26,26 @@ Resources:
       Layers:
         - !Ref OrmLayer
         - !Ref NativeLayer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints:
+          - src/lambda.ts
+        External:
+          - '@prisma/client'
+          - '@prisma/adapter-pg'
+          - 'prisma'
+          - 'pg'
+          - 'hono'
+          - 'hono-rate-limiter'
+          - 'pino'
+          - 'pino-pretty'
+          - 'zod'
+          - 'dotenv'
+          - '@hono/node-server'
 
   OrmLayer:
     Type: AWS::Serverless::LayerVersion

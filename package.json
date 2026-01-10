@@ -30,9 +30,11 @@
   },
   "devDependencies": {
     "@types/archiver": "^7.0.0",
+    "@types/aws-lambda": "^8.10.145",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.16.0",
     "archiver": "^7.0.1",
+    "esbuild": "^0.27.2",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.16"
