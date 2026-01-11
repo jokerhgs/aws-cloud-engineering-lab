@@ -19,15 +19,15 @@
             "path": "/"
         }
     },
-    "get-tasks": {
+    "get-users": {
         "body": null,
         "resource": "/{proxy+}",
-        "path": "/tasks",
+        "path": "/users",
         "httpMethod": "GET",
         "isBase64Encoded": false,
         "queryStringParameters": {},
         "pathParameters": {
-            "proxy": "tasks"
+            "proxy": "users"
         },
         "headers": {
             "Accept": "*/*",
@@ -36,7 +36,7 @@
         "requestContext": {
             "resourcePath": "/{proxy+}",
             "httpMethod": "GET",
-            "path": "/tasks"
+            "path": "/users"
         }
     }
 }

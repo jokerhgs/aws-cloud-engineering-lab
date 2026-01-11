@@ -15,8 +15,8 @@ Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/lambda.handler
-      CodeUri: .
+      Handler: dist/src/lambda.handler
+      CodeUri: deploy/function
       Events:
         ApiEvent:
           Type: Api
@@ -26,48 +26,24 @@ Resources:
       Layers:
         - !Ref OrmLayer
         - !Ref NativeLayer
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: false
-        Target: "es2022"
-        Sourcemap: true
-        EntryPoints:
-          - src/lambda.ts
-        External:
-          - '@prisma/client'
-          - '@prisma/adapter-pg'
-          - 'prisma'
-          - 'pg'
-          - 'hono'
-          - 'hono-rate-limiter'
-          - 'pino'
-          - 'pino-pretty'
-          - 'zod'
-          - 'dotenv'
-          - '@hono/node-server'
 
   OrmLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: orm-layer
       Description: Layer for Prisma and database dependencies
-      ContentUri: layers/orm
+      ContentUri: deploy/layers/layer-orm
       CompatibleRuntimes:
         - nodejs20.x
-    Metadata:
-      BuildMethod: nodejs20.x
 
   NativeLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: native-layer
       Description: Layer for Hono and utility dependencies
-      ContentUri: layers/native
+      ContentUri: deploy/layers/layer-native
       CompatibleRuntimes:
         - nodejs20.x
-    Metadata:
-      BuildMethod: nodejs20.x
 
 Outputs:
   ApiUrl:

@@ -82,7 +82,7 @@ function createLayerPackageJson(layerDir: string, config: any) {
 function runPnpmInstall(dir: string, layerName: string) {
     console.log(`Installing dependencies for ${layerName}...`);
     try {
-        execSync("pnpm install --prod", {
+        execSync("pnpm install --prod --config.confirmModulesPurge=false", {
             cwd: dir,
             stdio: "inherit",
         });
@@ -187,9 +187,9 @@ async function main() {
                 "prisma": "^7.1.0",
                 "pg": "^8.16.3"
             },
-            devDependencies: {
-                "@types/pg": "^8.16.0"
-            }
+            scripts: {
+                "postinstall": "prisma generate"
+            },
         });
 
         createLayerPackageJson(layerNativeDir, {
@@ -209,6 +209,13 @@ async function main() {
         });
 
         console.log("Layer setup completed\n");
+
+        // Step 0.5: Copy prisma folder to layer-orm (needed for generating client)
+        if (fs.existsSync(prismaDir)) {
+            const destLayerOrmPrisma = path.join(layerOrmDir, "prisma");
+            copyDirectory(prismaDir, destLayerOrmPrisma);
+            console.log(`Copied prisma to ${destLayerOrmPrisma}\n`);
+        }
 
         // Step 1: Copy dist folder
         console.log("Copying dist folder...");
