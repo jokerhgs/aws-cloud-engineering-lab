@@ -6,6 +6,14 @@ WORKDIR /app
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Set build arguments
+ARG DATABASE_URL
+ARG DIRECT_URL
+
+# Set environment variables for build time
+ENV DATABASE_URL=$DATABASE_URL
+ENV DIRECT_URL=$DIRECT_URL
+
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
@@ -31,6 +39,14 @@ WORKDIR /app
 
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set build arguments
+ARG DATABASE_URL
+ARG DIRECT_URL
+
+# Set environment variables for build time
+ENV DATABASE_URL=$DATABASE_URL
+ENV DIRECT_URL=$DIRECT_URL
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
