@@ -46,7 +46,7 @@ export async function update(
             data,
         });
     } catch (error) {
-        // Task not found
+        console.log(error);
         return null;
     }
 }
@@ -61,7 +61,7 @@ export async function deleteById(id: string): Promise<boolean> {
         });
         return true;
     } catch (error) {
-        // Task not found
+        console.log(error);
         return false;
     }
 }
