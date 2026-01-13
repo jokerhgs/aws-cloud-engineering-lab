@@ -2,6 +2,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import tasksRouter from './tasks-routes.js';
 import { prisma } from '../../lib/prisma.js';
+import type { Task, Prisma } from '@prisma/client';
 
 // Mock Prisma
 vi.mock('../../lib/prisma.js', () => ({
@@ -19,42 +20,44 @@ vi.mock('../../lib/prisma.js', () => ({
 
 describe('Tasks API', () => {
     const app = new Hono().route('/', tasksRouter);
-    let mockTasks: any[] = [];
+    let mockTasks: Task[] = [];
 
     beforeEach(() => {
         mockTasks = [];
         vi.clearAllMocks();
 
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         // Setup mock implementations
         vi.mocked(prisma.task.findMany).mockImplementation((() => Promise.resolve(mockTasks)) as any);
 
-        vi.mocked(prisma.task.findUnique).mockImplementation((({ where }: any) => {
-            const task = mockTasks.find(t => t.id === where.id);
+        vi.mocked(prisma.task.findUnique).mockImplementation(((args: Prisma.TaskFindUniqueArgs) => {
+            const task = mockTasks.find(t => t.id === args.where.id);
             return Promise.resolve(task || null);
         }) as any);
 
-        vi.mocked(prisma.task.create).mockImplementation((({ data }: any) => {
-            const newTask = {
+        vi.mocked(prisma.task.create).mockImplementation(((args: Prisma.TaskCreateArgs) => {
+            const newTask: Task = {
                 id: Math.random().toString(36).substring(7),
-                ...data,
+                ...args.data,
+                completed: args.data.completed ?? false,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            };
+            } as Task;
             mockTasks.push(newTask);
             return Promise.resolve(newTask);
         }) as any);
 
-        vi.mocked(prisma.task.update).mockImplementation((({ where, data }: any) => {
-            const index = mockTasks.findIndex(t => t.id === where.id);
+        vi.mocked(prisma.task.update).mockImplementation(((args: Prisma.TaskUpdateArgs) => {
+            const index = mockTasks.findIndex(t => t.id === args.where.id);
             if (index === -1) {
                 return Promise.reject(new Error('Record to update not found.'));
             }
-            mockTasks[index] = { ...mockTasks[index], ...data, updatedAt: new Date() };
+            mockTasks[index] = { ...mockTasks[index], ...args.data, updatedAt: new Date() } as Task;
             return Promise.resolve(mockTasks[index]);
         }) as any);
 
-        vi.mocked(prisma.task.delete).mockImplementation((({ where }: any) => {
-            const index = mockTasks.findIndex(t => t.id === where.id);
+        vi.mocked(prisma.task.delete).mockImplementation(((args: Prisma.TaskDeleteArgs) => {
+            const index = mockTasks.findIndex(t => t.id === args.where.id);
             if (index === -1) {
                 return Promise.reject(new Error('Record to delete not found.'));
             }
@@ -66,6 +69,7 @@ describe('Tasks API', () => {
             mockTasks = [];
             return Promise.resolve({ count: 0 });
         }) as any);
+        /* eslint-enable @typescript-eslint/no-explicit-any */
     });
 
     it('should return empty list initially', async () => {
