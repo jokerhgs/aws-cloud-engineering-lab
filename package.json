@@ -11,7 +11,9 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
-    "build:lambda": "tsx scripts/build-lambda-package.ts"
+    "build:lambda": "tsx scripts/build-lambda-package.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",
@@ -38,5 +40,22 @@
     "tsx": "^4.7.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.16"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "linux",
+        "windows",
+        "darwin"
+      ],
+      "cpu": [
+        "x64",
+        "arm64"
+      ],
+      "libc": [
+        "glibc",
+        "musl"
+      ]
+    }
   }
 }

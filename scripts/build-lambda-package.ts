@@ -155,10 +155,14 @@ async function createLayerZip(
 
         archive.pipe(output);
 
-        // Lambda layers require node_modules to be in nodejs/ directory
-        const nodeModulesPath = path.join(sourceDir, "node_modules");
-        if (fs.existsSync(nodeModulesPath)) {
-            archive.directory(nodeModulesPath, "nodejs/node_modules");
+        // Explicitly zip the 'nodejs' directory inside the layer folder
+        // and map it to 'nodejs' in the zip root.
+        // This ensures strictly correct structure and ignores sibling files/junk.
+        const nodejsPath = path.join(sourceDir, "nodejs");
+        if (fs.existsSync(nodejsPath)) {
+            archive.directory(nodejsPath, "nodejs");
+        } else {
+            console.warn(`WARNING: nodejs directory not found in ${sourceDir}`);
         }
 
         archive.finalize();
@@ -176,7 +180,8 @@ async function main() {
         // Step 0: Create layer package.json files
         console.log("Setting up Lambda layers...\n");
 
-        createLayerPackageJson(layerOrmDir, {
+        const layerOrmNodeJs = path.join(layerOrmDir, "nodejs");
+        createLayerPackageJson(layerOrmNodeJs, {
             name: "lambda-layer-orm",
             version: "1.0.0",
             description: "AWS Lambda Layer for ORM dependencies (Prisma and PostgreSQL)",
@@ -192,7 +197,8 @@ async function main() {
             },
         });
 
-        createLayerPackageJson(layerNativeDir, {
+        const layerNativeNodeJs = path.join(layerNativeDir, "nodejs");
+        createLayerPackageJson(layerNativeNodeJs, {
             name: "lambda-layer-native",
             version: "1.0.0",
             description: "AWS Lambda Layer for native application dependencies (Hono, logging, validation)",
@@ -212,7 +218,7 @@ async function main() {
 
         // Step 0.5: Copy prisma folder to layer-orm (needed for generating client)
         if (fs.existsSync(prismaDir)) {
-            const destLayerOrmPrisma = path.join(layerOrmDir, "prisma");
+            const destLayerOrmPrisma = path.join(layerOrmNodeJs, "prisma");
             copyDirectory(prismaDir, destLayerOrmPrisma);
             console.log(`Copied prisma to ${destLayerOrmPrisma}\n`);
         }
@@ -248,20 +254,20 @@ async function main() {
         }
 
         // Step 4: Install dependencies for layer-native
-        if (fs.existsSync(layerNativeDir)) {
-            runPnpmInstall(layerNativeDir, "layer-native");
+        if (fs.existsSync(layerNativeNodeJs)) {
+            runPnpmInstall(layerNativeNodeJs, "layer-native");
         } else {
             console.warn(
-                `WARNING: layer-native directory not found at ${layerNativeDir}\n`
+                `WARNING: layer-native directory not found at ${layerNativeNodeJs}\n`
             );
         }
 
         // Step 5: Install dependencies for layer-orm
-        if (fs.existsSync(layerOrmDir)) {
-            runPnpmInstall(layerOrmDir, "layer-orm");
+        if (fs.existsSync(layerOrmNodeJs)) {
+            runPnpmInstall(layerOrmNodeJs, "layer-orm");
         } else {
             console.warn(
-                `WARNING: layer-orm directory not found at ${layerOrmDir}\n`
+                `WARNING: layer-orm directory not found at ${layerOrmNodeJs}\n`
             );
         }
 
