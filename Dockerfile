@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -33,25 +33,27 @@ COPY . .
 RUN pnpm build
 
 # Production stage
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM public.ecr.aws/lambda/nodejs:20 AS runner
 
 # Set build arguments
 ARG DATABASE_URL
 ARG DIRECT_URL
 
-# Set environment variables for build time
+# Set environment variables for build/runtime
 ENV DATABASE_URL=$DATABASE_URL
 ENV DIRECT_URL=$DIRECT_URL
 
-# Copy package files
+# Lambda uses /var/task as the working directory
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy package files (we use npm here as it's built-in to the AWS image)
 COPY package.json pnpm-lock.yaml ./
 
-# Install production dependencies only
+# Install production dependencies
+# Note: Since the base image is Amazon Linux, we use npm to install from the lockfile if possible, 
+# or just copy node_modules from a stage that matches the architecture.
+# To keep it simple and reliable for Lambda, we'll install pnpm and use it.
+RUN npm install -g pnpm@latest
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy prisma directory & generate client
@@ -61,8 +63,5 @@ RUN pnpm db:generate
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Expose the application port
-EXPOSE 3000
-
-# Start the application
-CMD ["npm", "start"]
+# Set the handler for Lambda
+CMD ["dist/lambda.handler"]
